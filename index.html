@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Marcador de Casas</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h1>Marcador por Casas</h1>
+
+<div class="container">
+  <div class="house">
+    <button id="btnCartago">Agregar punto a Cartago</button>
+    <div class="score" id="scoreCartago">0</div>
+  </div>
+
+  <div class="house">
+    <button id="btnHipona">Agregar punto a Hipona</button>
+    <div class="score" id="scoreHipona">0</div>
+  </div>
+
+  <div class="house">
+    <button id="btnMilan">Agregar punto a Milán</button>
+    <div class="score" id="scoreMilan">0</div>
+  </div>
+
+  <div class="house">
+    <button id="btnTagaste">Agregar punto a Tagaste</button>
+    <div class="score" id="scoreTagaste">0</div>
+  </div>
+</div>
+
+<canvas id="barChart" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
