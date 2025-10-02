@@ -201,12 +201,30 @@
             padding-bottom: 5px;
         }
         
+        .grade-section {
+            grid-column: 1 / -1;
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
         .logout-btn {
             background-color: #e74c3c;
         }
         
         .logout-btn:hover {
             background-color: #c0392b;
+        }
+        
+        .current-grade {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
         }
         
         @media (max-width: 768px) {
@@ -307,6 +325,33 @@
         <div id="points-entry" class="page">
             <h2>Ingresar Puntos</h2>
             <button id="logout-btn" class="logout-btn">Cerrar Sesión</button>
+            
+            <!-- Sección para seleccionar grado -->
+            <div class="grade-section">
+                <h3>Seleccionar Grado</h3>
+                <div class="form-group">
+                    <label for="grade-select">Grado:</label>
+                    <select id="grade-select">
+                        <option value="">Seleccionar grado</option>
+                        <option value="pre-kinder">Pre Kinder</option>
+                        <option value="kinder">Kinder</option>
+                        <option value="1ro">1er Grado</option>
+                        <option value="2do">2do Grado</option>
+                        <option value="3ro">3er Grado</option>
+                        <option value="4to">4to Grado</option>
+                        <option value="5to">5to Grado</option>
+                        <option value="6to">6to Grado</option>
+                        <option value="7mo">7mo Grado</option>
+                        <option value="8vo">8vo Grado</option>
+                        <option value="9no">9no Grado</option>
+                        <option value="10mo">10mo Grado</option>
+                        <option value="11mo">11mo Grado</option>
+                    </select>
+                </div>
+                <div id="current-grade-display" class="current-grade" style="display: none;">
+                    Grado seleccionado: <span id="selected-grade">Ninguno</span>
+                </div>
+            </div>
             
             <div class="points-form">
                 <div class="form-section">
@@ -411,6 +456,9 @@
             password: "admin123"
         };
         
+        // Variable para almacenar el grado seleccionado
+        let selectedGrade = "";
+        
         // Elementos del DOM
         const navLinks = document.querySelectorAll('.nav-link');
         const pages = document.querySelectorAll('.page');
@@ -419,6 +467,9 @@
         const addCollectiveBtn = document.getElementById('add-collective-points');
         const addIndividualBtn = document.getElementById('add-individual-points');
         const pointsMessage = document.getElementById('points-message');
+        const gradeSelect = document.getElementById('grade-select');
+        const currentGradeDisplay = document.getElementById('current-grade-display');
+        const selectedGradeSpan = document.getElementById('selected-grade');
         
         // Navegación entre páginas
         navLinks.forEach(link => {
@@ -475,16 +526,52 @@
         // Cerrar sesión
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('isLoggedIn');
+            selectedGrade = "";
+            updateGradeDisplay();
             showPage('login');
         });
         
-        // Si ya está logueado, mostrar la página de ingreso de puntos
-        if (isLoggedIn()) {
-            showPage('points-entry');
+        // Manejar selección de grado
+        gradeSelect.addEventListener('change', (e) => {
+            selectedGrade = e.target.value;
+            updateGradeDisplay();
+        });
+        
+        // Actualizar display del grado seleccionado
+        function updateGradeDisplay() {
+            if (selectedGrade) {
+                const gradeText = getGradeText(selectedGrade);
+                selectedGradeSpan.textContent = gradeText;
+                currentGradeDisplay.style.display = 'block';
+            } else {
+                currentGradeDisplay.style.display = 'none';
+            }
+        }
+        
+        // Obtener texto del grado
+        function getGradeText(gradeValue) {
+            const grades = {
+                'pre-kinder': 'Pre Kinder',
+                'kinder': 'Kinder',
+                '1ro': '1er Grado',
+                '2do': '2do Grado',
+                '3ro': '3er Grado',
+                '4to': '4to Grado',
+                '5to': '5to Grado',
+                '6to': '6to Grado',
+                '7mo': '7mo Grado',
+                '8vo': '8vo Grado',
+                '9no': '9no Grado',
+                '10mo': '10mo Grado',
+                '11mo': '11mo Grado'
+            };
+            return grades[gradeValue] || 'Ninguno';
         }
         
         // Agregar puntos para deportes colectivos
         addCollectiveBtn.addEventListener('click', () => {
+            if (!validateGradeSelection()) return;
+            
             const sport = document.getElementById('collective-sport').value;
             const position = document.getElementById('collective-position').value;
             const house = document.getElementById('collective-house').value;
@@ -498,7 +585,7 @@
             houses[house].score += points;
             
             updateScores();
-            showMessage(`Se agregaron ${points} puntos a ${houses[house].name} por ${sport}`, 'success');
+            showMessage(`Se agregaron ${points} puntos a ${houses[house].name} por ${sport} en ${getGradeText(selectedGrade)}`, 'success');
             
             // Limpiar formulario
             document.getElementById('collective-sport').value = '';
@@ -508,6 +595,8 @@
         
         // Agregar puntos para deportes individuales
         addIndividualBtn.addEventListener('click', () => {
+            if (!validateGradeSelection()) return;
+            
             const sport = document.getElementById('individual-sport').value;
             const position = document.getElementById('individual-position').value;
             const house = document.getElementById('individual-house').value;
@@ -521,13 +610,22 @@
             houses[house].score += points;
             
             updateScores();
-            showMessage(`Se agregaron ${points} puntos a ${houses[house].name} por ${sport}`, 'success');
+            showMessage(`Se agregaron ${points} puntos a ${houses[house].name} por ${sport} en ${getGradeText(selectedGrade)}`, 'success');
             
             // Limpiar formulario
             document.getElementById('individual-sport').value = '';
             document.getElementById('individual-position').value = '';
             document.getElementById('individual-house').value = '';
         });
+        
+        // Validar que se haya seleccionado un grado
+        function validateGradeSelection() {
+            if (!selectedGrade) {
+                showMessage('Por favor, seleccione un grado primero', 'error');
+                return false;
+            }
+            return true;
+        }
         
         // Mostrar mensajes
         function showMessage(text, type) {
@@ -591,9 +689,8 @@
             const tableBody = document.querySelector('#results-by-grade tbody');
             tableBody.innerHTML = '';
             
-            // En un caso real, estos datos vendrían de una base de datos
             const grades = [
-                'Pre-Kinder', 'Kinder', '1ro', '2do', '3ro', '4to', '5to',
+                'pre-kinder', 'kinder', '1ro', '2do', '3ro', '4to', '5to',
                 '6to', '7mo', '8vo', '9no', '10mo', '11mo'
             ];
             
@@ -618,7 +715,7 @@
                 );
                 
                 row.innerHTML = `
-                    <td>${grade}</td>
+                    <td>${getGradeText(grade)}</td>
                     <td>${cartagoScore}</td>
                     <td>${hiponaScore}</td>
                     <td>${milanScore}</td>
