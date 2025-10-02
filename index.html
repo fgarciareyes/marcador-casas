@@ -1,40 +1,647 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Marcador de Casas</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcador de Competencias</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --cartago: #4CAF50;
+            --hipona: #2196F3;
+            --milan: #F44336;
+            --tagaste: #FFC107;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 {
+            font-size: 24px;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav li {
+            margin-left: 20px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        nav a:hover, nav a.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        .page {
+            display: none;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .login-form {
+            max-width: 400px;
+            margin: 50px auto;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .houses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .house-card {
+            border-radius: 8px;
+            padding: 15px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        
+        .house-card.cartago {
+            background-color: var(--cartago);
+        }
+        
+        .house-card.hipona {
+            background-color: var(--hipona);
+        }
+        
+        .house-card.milan {
+            background-color: var(--milan);
+        }
+        
+        .house-card.tagaste {
+            background-color: var(--tagaste);
+            color: #333;
+        }
+        
+        .house-card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .house-card .score {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        .chart-container {
+            margin-top: 30px;
+            height: 400px;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .results-table th, .results-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .results-table th {
+            background-color: #f2f2f2;
+        }
+        
+        .points-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .form-section h3 {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+        
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        @media (max-width: 768px) {
+            .points-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                margin-top: 10px;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <div class="container header-content">
+            <h1>Marcador de Competencias</h1>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-page="results">Resultados</a></li>
+                    <li><a href="#" class="nav-link" data-page="login">Ingresar Puntos</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Página de resultados -->
+        <div id="results" class="page active">
+            <h2>Resultados por Casa</h2>
+            
+            <div class="houses-grid">
+                <div class="house-card cartago">
+                    <h3>Cartago</h3>
+                    <div class="score" id="cartago-score">0</div>
+                </div>
+                <div class="house-card hipona">
+                    <h3>Hipona</h3>
+                    <div class="score" id="hipona-score">0</div>
+                </div>
+                <div class="house-card milan">
+                    <h3>Milán</h3>
+                    <div class="score" id="milan-score">0</div>
+                </div>
+                <div class="house-card tagaste">
+                    <h3>Tagaste</h3>
+                    <div class="score" id="tagaste-score">0</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="scoreChart"></canvas>
+            </div>
+            
+            <h3>Resultados por Grado</h3>
+            <table class="results-table" id="results-by-grade">
+                <thead>
+                    <tr>
+                        <th>Grado</th>
+                        <th>Cartago</th>
+                        <th>Hipona</th>
+                        <th>Milán</th>
+                        <th>Tagaste</th>
+                        <th>Ganador</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se llenarán con JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Página de login -->
+        <div id="login" class="page">
+            <div class="login-form">
+                <h2>Ingresar al Sistema</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Usuario:</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit">Ingresar</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Página de ingreso de puntos (solo visible después del login) -->
+        <div id="points-entry" class="page">
+            <h2>Ingresar Puntos</h2>
+            <button id="logout-btn" class="logout-btn">Cerrar Sesión</button>
+            
+            <div class="points-form">
+                <div class="form-section">
+                    <h3>Deportes Colectivos</h3>
+                    <div class="form-group">
+                        <label for="collective-sport">Deporte:</label>
+                        <select id="collective-sport">
+                            <option value="">Seleccionar deporte</option>
+                            <option value="futbol-varones">Fútbol Varones</option>
+                            <option value="futbol-damas">Fútbol Damas</option>
+                            <option value="voley-masculino">Voley Masculino</option>
+                            <option value="voley-femenino">Voley Femenino</option>
+                            <option value="basket-varones">Basket Varones</option>
+                            <option value="basket-damas">Basket Damas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="collective-position">Posición:</label>
+                        <select id="collective-position">
+                            <option value="">Seleccionar posición</option>
+                            <option value="1">1er Puesto (100 pts)</option>
+                            <option value="2">2do Puesto (80 pts)</option>
+                            <option value="3">3er Puesto (60 pts)</option>
+                            <option value="4">4to Puesto (40 pts)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="collective-house">Casa:</label>
+                        <select id="collective-house">
+                            <option value="">Seleccionar casa</option>
+                            <option value="cartago">Cartago</option>
+                            <option value="hipona">Hipona</option>
+                            <option value="milan">Milán</option>
+                            <option value="tagaste">Tagaste</option>
+                        </select>
+                    </div>
+                    <button id="add-collective-points">Agregar Puntos</button>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Deportes Individuales</h3>
+                    <div class="form-group">
+                        <label for="individual-sport">Deporte:</label>
+                        <select id="individual-sport">
+                            <option value="">Seleccionar deporte</option>
+                            <option value="velocidad">Velocidad (80 mt)</option>
+                            <option value="salto-largo">Salto Largo</option>
+                            <option value="maraton">Maratón</option>
+                            <option value="natacion-libre">Natación 25mt Libre</option>
+                            <option value="natacion-espalda">Natación 25mt Espalda</option>
+                            <option value="natacion-pecho">Natación 25mt Pecho</option>
+                            <option value="natacion-mariposa">Natación 25mt Mariposa</option>
+                            <option value="natacion-combinado">Natación 100mt Combinado</option>
+                            <option value="tenis-mesa">Tenis de Mesa</option>
+                            <option value="ajedrez">Ajedrez</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="individual-position">Posición:</label>
+                        <select id="individual-position">
+                            <option value="">Seleccionar posición</option>
+                            <option value="1">1er Puesto (20 pts)</option>
+                            <option value="2">2do Puesto (16 pts)</option>
+                            <option value="3">3er Puesto (14 pts)</option>
+                            <option value="4">4to Puesto (12 pts)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="individual-house">Casa:</label>
+                        <select id="individual-house">
+                            <option value="">Seleccionar casa</option>
+                            <option value="cartago">Cartago</option>
+                            <option value="hipona">Hipona</option>
+                            <option value="milan">Milán</option>
+                            <option value="tagaste">Tagaste</option>
+                        </select>
+                    </div>
+                    <button id="add-individual-points">Agregar Puntos</button>
+                </div>
+            </div>
+            
+            <div id="points-message" style="margin-top: 20px; padding: 10px; display: none;"></div>
+        </div>
+    </div>
 
-<h1>Marcador por Casas</h1>
-
-<div class="container">
-  <div class="house">
-    <button id="btnCartago">Agregar punto a Cartago</button>
-    <div class="score" id="scoreCartago">0</div>
-  </div>
-
-  <div class="house">
-    <button id="btnHipona">Agregar punto a Hipona</button>
-    <div class="score" id="scoreHipona">0</div>
-  </div>
-
-  <div class="house">
-    <button id="btnMilan">Agregar punto a Milán</button>
-    <div class="score" id="scoreMilan">0</div>
-  </div>
-
-  <div class="house">
-    <button id="btnTagaste">Agregar punto a Tagaste</button>
-    <div class="score" id="scoreTagaste">0</div>
-  </div>
-</div>
-
-<canvas id="barChart" width="400" height="200"></canvas>
-
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-<script src="script.js"></script>
+    <script>
+        // Datos de ejemplo para las casas
+        let houses = {
+            cartago: { name: "Cartago", color: "#4CAF50", score: 0 },
+            hipona: { name: "Hipona", color: "#2196F3", score: 0 },
+            milan: { name: "Milán", color: "#F44336", score: 0 },
+            tagaste: { name: "Tagaste", color: "#FFC107", score: 0 }
+        };
+        
+        // Puntos por posición
+        const collectivePoints = {1: 100, 2: 80, 3: 60, 4: 40};
+        const individualPoints = {1: 20, 2: 16, 3: 14, 4: 12};
+        
+        // Credenciales de acceso (en un caso real, esto estaría en el servidor)
+        const validCredentials = {
+            username: "admin",
+            password: "admin123"
+        };
+        
+        // Elementos del DOM
+        const navLinks = document.querySelectorAll('.nav-link');
+        const pages = document.querySelectorAll('.page');
+        const loginForm = document.getElementById('loginForm');
+        const logoutBtn = document.getElementById('logout-btn');
+        const addCollectiveBtn = document.getElementById('add-collective-points');
+        const addIndividualBtn = document.getElementById('add-individual-points');
+        const pointsMessage = document.getElementById('points-message');
+        
+        // Navegación entre páginas
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetPage = link.getAttribute('data-page');
+                
+                // Si intenta acceder a la página de ingreso de puntos sin estar logueado
+                if (targetPage === 'points-entry' && !isLoggedIn()) {
+                    showPage('login');
+                    return;
+                }
+                
+                showPage(targetPage);
+            });
+        });
+        
+        // Mostrar página específica
+        function showPage(pageId) {
+            pages.forEach(page => {
+                page.classList.remove('active');
+                if (page.id === pageId) {
+                    page.classList.add('active');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-page') === pageId) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        // Verificar si el usuario está logueado
+        function isLoggedIn() {
+            return localStorage.getItem('isLoggedIn') === 'true';
+        }
+        
+        // Manejo del formulario de login
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === validCredentials.username && password === validCredentials.password) {
+                localStorage.setItem('isLoggedIn', 'true');
+                showPage('points-entry');
+            } else {
+                alert('Usuario o contraseña incorrectos');
+            }
+        });
+        
+        // Cerrar sesión
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('isLoggedIn');
+            showPage('login');
+        });
+        
+        // Si ya está logueado, mostrar la página de ingreso de puntos
+        if (isLoggedIn()) {
+            showPage('points-entry');
+        }
+        
+        // Agregar puntos para deportes colectivos
+        addCollectiveBtn.addEventListener('click', () => {
+            const sport = document.getElementById('collective-sport').value;
+            const position = document.getElementById('collective-position').value;
+            const house = document.getElementById('collective-house').value;
+            
+            if (!sport || !position || !house) {
+                showMessage('Por favor, complete todos los campos', 'error');
+                return;
+            }
+            
+            const points = collectivePoints[position];
+            houses[house].score += points;
+            
+            updateScores();
+            showMessage(`Se agregaron ${points} puntos a ${houses[house].name} por ${sport}`, 'success');
+            
+            // Limpiar formulario
+            document.getElementById('collective-sport').value = '';
+            document.getElementById('collective-position').value = '';
+            document.getElementById('collective-house').value = '';
+        });
+        
+        // Agregar puntos para deportes individuales
+        addIndividualBtn.addEventListener('click', () => {
+            const sport = document.getElementById('individual-sport').value;
+            const position = document.getElementById('individual-position').value;
+            const house = document.getElementById('individual-house').value;
+            
+            if (!sport || !position || !house) {
+                showMessage('Por favor, complete todos los campos', 'error');
+                return;
+            }
+            
+            const points = individualPoints[position];
+            houses[house].score += points;
+            
+            updateScores();
+            showMessage(`Se agregaron ${points} puntos a ${houses[house].name} por ${sport}`, 'success');
+            
+            // Limpiar formulario
+            document.getElementById('individual-sport').value = '';
+            document.getElementById('individual-position').value = '';
+            document.getElementById('individual-house').value = '';
+        });
+        
+        // Mostrar mensajes
+        function showMessage(text, type) {
+            pointsMessage.textContent = text;
+            pointsMessage.style.display = 'block';
+            pointsMessage.style.backgroundColor = type === 'success' ? '#d4edda' : '#f8d7da';
+            pointsMessage.style.color = type === 'success' ? '#155724' : '#721c24';
+            pointsMessage.style.border = type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb';
+            
+            setTimeout(() => {
+                pointsMessage.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Actualizar puntajes en la interfaz
+        function updateScores() {
+            document.getElementById('cartago-score').textContent = houses.cartago.score;
+            document.getElementById('hipona-score').textContent = houses.hipona.score;
+            document.getElementById('milan-score').textContent = houses.milan.score;
+            document.getElementById('tagaste-score').textContent = houses.tagaste.score;
+            
+            updateChart();
+            updateGradeTable();
+        }
+        
+        // Actualizar gráfico
+        let scoreChart;
+        function updateChart() {
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            
+            if (scoreChart) {
+                scoreChart.destroy();
+            }
+            
+            scoreChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.values(houses).map(house => house.name),
+                    datasets: [{
+                        label: 'Puntos',
+                        data: Object.values(houses).map(house => house.score),
+                        backgroundColor: Object.values(houses).map(house => house.color),
+                        borderColor: Object.values(houses).map(house => house.color),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Actualizar tabla de resultados por grado
+        function updateGradeTable() {
+            const tableBody = document.querySelector('#results-by-grade tbody');
+            tableBody.innerHTML = '';
+            
+            // En un caso real, estos datos vendrían de una base de datos
+            const grades = [
+                'Pre-Kinder', 'Kinder', '1ro', '2do', '3ro', '4to', '5to',
+                '6to', '7mo', '8vo', '9no', '10mo', '11mo'
+            ];
+            
+            grades.forEach(grade => {
+                const row = document.createElement('tr');
+                
+                // Generar puntajes aleatorios para ejemplo
+                const cartagoScore = Math.floor(Math.random() * 100);
+                const hiponaScore = Math.floor(Math.random() * 100);
+                const milanScore = Math.floor(Math.random() * 100);
+                const tagasteScore = Math.floor(Math.random() * 100);
+                
+                const scores = {
+                    cartago: cartagoScore,
+                    hipona: hiponaScore,
+                    milan: milanScore,
+                    tagaste: tagasteScore
+                };
+                
+                const winner = Object.keys(scores).reduce((a, b) => 
+                    scores[a] > scores[b] ? a : b
+                );
+                
+                row.innerHTML = `
+                    <td>${grade}</td>
+                    <td>${cartagoScore}</td>
+                    <td>${hiponaScore}</td>
+                    <td>${milanScore}</td>
+                    <td>${tagasteScore}</td>
+                    <td style="font-weight: bold; color: ${houses[winner].color}">${houses[winner].name}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Inicializar la aplicación
+        function init() {
+            updateScores();
+            
+            // Si está logueado, mostrar la página de ingreso de puntos
+            if (isLoggedIn()) {
+                showPage('points-entry');
+            }
+        }
+        
+        // Ejecutar inicialización cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
